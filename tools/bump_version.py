@@ -51,6 +51,10 @@ def main():
     if a.app_version: print(f'APP_VERSION    -> {a.app_version}  (core.js + .appver label)')
     if a.dry_run: print('dry run: nothing written'); return
     for f, t in (('index.html', html2), ('sw.js', sw2), ('js/core.js', core2)): open(P(f), 'w', encoding='utf-8').write(t)
+    for f in sorted(os.listdir(a.root)):            # POSPRO: other pages (order.html) share the same ?v= counter
+        if f.endswith('.html') and f != 'index.html':
+            t = open(P(f), encoding='utf-8').read(); t2, n = re.subn(r'\?v=\d+', f'?v={new_asset}', t)
+            if n: open(P(f), 'w', encoding='utf-8').write(t2); print(f'               {n} URLs in {f}')
     print('written. Now run check_release.py')
 
 if __name__ == '__main__': main()

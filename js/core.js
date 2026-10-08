@@ -1,7 +1,7 @@
 // =====================================================================
 // core.js — version, config, Supabase client, shared state and small helpers
 // =====================================================================
-const APP_VERSION='2.0.0';
+const APP_VERSION='2.1.0';
 const CFG=window.POSPRO_CONFIG||{};
 let sb=null;
 

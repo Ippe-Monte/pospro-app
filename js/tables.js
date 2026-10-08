@@ -1,23 +1,7 @@
 // =====================================================================
-// tables.js — dining tables (names, order, QR on/off) and kitchen stations
-// V2.0.0: set-up only. Live table status, QR ordering and the kitchen display arrive in V2.1.
+// tables.js — editors for dining tables (name, order, QR on/off, new QR) and kitchen stations
+// The live tables page and the kitchen display are in live.js.
 // =====================================================================
-definePage('tables',{title:'โต๊ะ',roles:['owner','manager','cashier'],
-  actions(){return can('owner','manager')?`<button type="button" class="btn sm" id="actAddTable">${ic('plus')}โต๊ะ</button>`:''},
-  async render(){
-    const rows=must(await sb.from('dining_tables').select('id,name,sort,qr_enabled').eq('shop_id',S.shopId).order('sort').order('name'));
-    const note=`<div class="notice info">${ic('info')}<span>สถานะโต๊ะแบบสด (ว่าง / กำลังทาน / รอเช็คบิล) และ QR ให้ลูกค้าสั่งเอง จะเปิดใช้ใน <b>V2.1</b> ตอนนี้ตั้งชื่อและลำดับโต๊ะไว้ก่อน</span></div>`;
-    if(!rows.length)return note+`<div class="card empty">ยังไม่มีโต๊ะ</div>`;
-    return note+`<div class="list">${rows.map(t=>`<button type="button" class="row${can('owner','manager')?' tap':''}" style="width:100%;text-align:left" data-table="${t.id}">
-      <span class="ichip">${ic('table')}</span><span class="grow"><span class="t">${esc(t.name)}</span><span class="s">ลำดับ ${t.sort} · QR ${t.qr_enabled?'เปิด':'ปิด'}</span></span>${can('owner','manager')?ic('edit'):''}</button>`).join('')}</div>`;
-  },
-  bind(v){
-    const a=v.querySelector('#actAddTable');if(a)a.onclick=()=>editTable(null);
-    if(can('owner','manager'))v.querySelectorAll('[data-table]').forEach(b=>b.onclick=async()=>{
-      const t=must(await sb.from('dining_tables').select('*').eq('id',b.dataset.table).single());editTable(t)});
-  }
-});
-
 async function editTable(t){
   const isNew=!t;
   if(isNew){const {count}=await sb.from('dining_tables').select('*',{count:'exact',head:true}).eq('shop_id',S.shopId);t={name:'โต๊ะ '+((count||0)+1),sort:(count||0)+1,qr_enabled:true}}
@@ -44,18 +28,15 @@ async function editTable(t){
   };
 }
 
-definePage('kitchen',{title:'ครัว',
-  actions(){return can('owner','manager')?`<button type="button" class="btn sm" id="actAddSt">${ic('plus')}สถานี</button>`:''},
-  async render(){
-    const rows=must(await sb.from('stations').select('*').eq('shop_id',S.shopId).order('sort').order('name'));
-    const note=`<div class="notice info">${ic('info')}<span>จอครัวแบบสด (ตั๋วออเดอร์ เริ่มทำ / เสิร์ฟแล้ว) จะเปิดใช้ใน <b>V2.1</b> ตอนนี้ตั้งสถานีครัวไว้ก่อน แล้วเลือกในแต่ละเมนูว่าส่งไปสถานีไหน</span></div>`;
-    return note+`<div class="section"><h3>สถานีครัว</h3></div>`+(rows.length?`<div class="list">${rows.map(st=>`<button type="button" class="row${can('owner','manager')?' tap':''}" style="width:100%;text-align:left" data-st="${st.id}"><span class="ichip">${ic('flame')}</span><span class="grow"><span class="t">${esc(st.name)}</span></span>${can('owner','manager')?ic('edit'):''}</button>`).join('')}</div>`:`<div class="card empty">ยังไม่มีสถานีครัว</div>`);
-  },
-  bind(v){
-    const a=v.querySelector('#actAddSt');if(a)a.onclick=()=>editStation(null);
-    if(can('owner','manager'))v.querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>editStation(must(await sb.from('stations').select('*').eq('id',b.dataset.st).single())));
-  }
-});
+// stations list in a sheet (opened from the kitchen page by owner / manager)
+async function openStationsSheet(){
+  const rows=must(await sb.from('stations').select('*').eq('shop_id',S.shopId).order('sort').order('name'));
+  const s=openSheet('สถานีครัว',`<p class="mini muted" style="margin-bottom:8px">แต่ละเมนูเลือกได้ว่าส่งไปสถานีไหน จอครัวแต่ละจอจะเห็นเฉพาะสถานีของตัวเอง</p>
+    <div class="list">${rows.map(st=>`<button type="button" class="row tap" style="width:100%;text-align:left" data-st="${st.id}"><span class="ichip">${ic('flame')}</span><span class="grow"><span class="t">${esc(st.name)}</span></span>${ic('edit')}</button>`).join('')||'<div class="empty">ยังไม่มีสถานี</div>'}</div>`,
+    `<button type="button" class="btn" id="stAdd">${ic('plus')}เพิ่มสถานี</button>`);
+  s.el.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{s.close();editStation(rows.find(x=>x.id===b.dataset.st))});
+  s.el.querySelector('#stAdd').onclick=()=>{s.close();editStation(null)};
+}
 
 function editStation(st){
   const isNew=!st;st=st||{name:'',sort:0};

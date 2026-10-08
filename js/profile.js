@@ -6,14 +6,16 @@
 // menu items are data: icon, label, page, optional sub caption, roles, when()
 const PROFILE_MENU=[
   {group:'ร้าน',items:[
+    {icon:'check', label:'ตั้งค่าร้านให้พร้อมขาย', go:'setup', roles:['owner','manager']},
     {icon:'book',  label:'เมนูและสินค้า',  go:'menu',     roles:['owner','manager']},
-    {icon:'box',   label:'สต๊อกวัตถุดิบ',  go:'stock',    roles:['owner','manager'], sub:'V2.2'},
-    {icon:'tag',   label:'โปรโมชัน',       go:'promo',    roles:['owner','manager'], sub:'V2.2'},
-    {icon:'card',  label:'สมาชิก',         go:'customers',roles:['owner','manager','cashier'], sub:'V2.2'},
+    {icon:'box',   label:'สต๊อกวัตถุดิบ',  go:'stock',    roles:['owner','manager']},
+    {icon:'tag',   label:'โปรโมชัน',       go:'promo',    roles:['owner','manager']},
+    {icon:'card',  label:'สมาชิก',         go:'customers',roles:['owner','manager','cashier']},
   ]},
   {group:'เงิน',items:[
+    {icon:'drawer', label:'ลิ้นชักเงินสด',      go:'drawer',  roles:['owner','manager','cashier']},
+    {icon:'summary',label:'สรุปยอดขาย',        go:'summary', roles:['owner','manager','cashier']},
     {icon:'expense',label:'รายจ่าย',          go:'expenses',roles:['owner','manager'], sub:'V2.2'},
-    {icon:'drawer', label:'ลิ้นชักเงินสด',      go:'drawer',  roles:['owner','manager','cashier'], sub:'V2.1'},
     {icon:'lock',   label:'ปิดยอดประจำวัน',    go:'closing', roles:['owner','manager'], sub:'V2.2'},
   ]},
   {group:'ระบบ',items:[
@@ -84,10 +86,6 @@ definePage('settings',{title:'ตั้งค่าร้าน',roles:['owner',
 });
 
 // planned pages: reachable now so the menu structure is final, honest about when they arrive
-[['stock','สต๊อกวัตถุดิบ','V2.2',['ตัดสต๊อกอัตโนมัติจากสูตรของแต่ละเมนูเมื่อชำระเงิน','แจ้งเตือนวัตถุดิบใกล้หมด','รูปวัตถุดิบใช้ระบบย่อรูปอัตโนมัติแบบเดียวกับเมนู'],['owner','manager']],
- ['promo','โปรโมชัน','V2.2',['โค้ดส่วนลดแบบเปอร์เซ็นต์หรือจำนวนเงิน','เปิด/ปิดโปรได้ทันที'],['owner','manager']],
- ['customers','สมาชิก','V2.2',['สะสมแต้มและยอดใช้จ่าย','ค้นหาด้วยเบอร์โทรตอนเช็คบิล'],['owner','manager','cashier']],
- ['expenses','รายจ่าย','V2.2',['บันทึกบิลซื้อของหลายรายการต่อบิล','แนบรูปใบเสร็จ (ย่อรูปอัตโนมัติ เก็บแบบส่วนตัว)','ผู้จำหน่าย'],['owner','manager']],
- ['drawer','ลิ้นชักเงินสด','V2.1',['เปิดกะพร้อมเงินทอนตั้งต้น','ปิดกะ นับเงินจริงเทียบกับยอดขายเงินสด'],['owner','manager','cashier']],
+[['expenses','รายจ่าย','V2.2',['บันทึกบิลซื้อของหลายรายการต่อบิล','แนบรูปใบเสร็จ (ย่อรูปอัตโนมัติ เก็บแบบส่วนตัว)','ผู้จำหน่าย'],['owner','manager']],
  ['closing','ปิดยอดประจำวัน','V2.2',['สรุปยอดขาย รายจ่าย และกำไรขั้นต้นของวัน','ส่งออกเป็นไฟล์ Excel'],['owner','manager']],
 ].forEach(([id,title,when,points,roles])=>definePage(id,{title,roles,sub:true,render:async()=>comingSoon(title,when,points)}));

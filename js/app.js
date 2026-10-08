@@ -17,4 +17,5 @@ async function boot(){
 if('serviceWorker' in navigator&&location.protocol!=='file:'){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(e=>console.warn('sw',e)));
 }
+startEmojiConverter();
 boot().catch(e=>{console.error(e);renderLogin(friendlyError(e))});

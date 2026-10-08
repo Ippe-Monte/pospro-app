@@ -81,6 +81,95 @@ const LINE_ICONS={
 "more": "<circle cx=\"5\" cy=\"12\" r=\"1.3\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\"/><circle cx=\"19\" cy=\"12\" r=\"1.3\"/>",
 "edit": "<path d=\"M4 20h4L19 9l-4-4L4 16v4Z\"/><path d=\"m13.5 6.5 4 4\"/>",
 "store": "<path d=\"M4 9h16l-1.5-5h-13L4 9Z\"/><path d=\"M5 9v11h14V9\"/><path d=\"M10 20v-6h4v6\"/>",
-"refresh": "<path d=\"M20 11a8 8 0 0 0-14.6-4.5L4 8\"/><path d=\"M4 4v4h4\"/><path d=\"M4 13a8 8 0 0 0 14.6 4.5L20 16\"/><path d=\"M20 20v-4h-4\"/>"
+"refresh": "<path d=\"M20 11a8 8 0 0 0-14.6-4.5L4 8\"/><path d=\"M4 4v4h4\"/><path d=\"M4 13a8 8 0 0 0 14.6 4.5L20 16\"/><path d=\"M20 20v-4h-4\"/>",
+"noodle": "<path d=\"M3 12h18a9 9 0 0 1-18 0Z\"/><path d=\"M7 12V8M10.5 12V7M14 12V8\"/><path d=\"M15 3 21 9M12.5 4 19 10\"/>",
+"rice": "<path d=\"M3 12h18a9 9 0 0 1-18 0Z\"/><path d=\"M6 12a6 4 0 0 1 12 0\"/><path d=\"M10 8.6v.01M13 8.2v.01M11.6 10v.01\"/>",
+"drink": "<path d=\"M6 8h12l-1.5 12h-9L6 8Z\"/><path d=\"M5 8h14M13 8l2.5-5\"/><path d=\"M7 13h10\"/>",
+"coffee": "<path d=\"M4 9h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Z\"/><path d=\"M17 11h1.5a2.5 2.5 0 0 1 0 5H17\"/><path d=\"M8 3c-.8 1 .8 2 0 3M12 3c-.8 1 .8 2 0 3\"/>",
+"dessert": "<circle cx=\"12\" cy=\"8\" r=\"4.5\"/><path d=\"M7.6 9.6 12 21l4.4-11.4\"/><path d=\"M9.5 13.5l4.2-2M10.5 16.5l2.8-1.4\"/>",
+"cake": "<path d=\"M4 21V13a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8\"/><path d=\"M4 16c2 1.3 4-1.3 6 0s4-1.3 6 0 3 .7 4 0\"/><path d=\"M3 21h18M12 11V8\"/><path d=\"M12 4.5c.9 1 .9 2 0 2.6-.9-.6-.9-1.6 0-2.6Z\"/>",
+"fries": "<path d=\"M6 10h12l-1.5 11h-9L6 10Z\"/><path d=\"M8 10 7 3.5M11 10V3M14 10l1-6M16.5 10l1.5-4.5\"/>",
+"meat": "<path d=\"M14.5 3.5a5.5 5.5 0 0 1 5.4 6.6c-.6 3.1-3.6 4.4-6.5 4.6L9.6 18.5\"/><path d=\"M14.5 3.5c-3 0-5.6 2.4-5.6 5.4 0 1.5.3 2.6 1 3.6L6.4 16\"/><circle cx=\"6\" cy=\"19\" r=\"2\"/><circle cx=\"4.2\" cy=\"16.6\" r=\"1.4\"/>",
+"fish": "<path d=\"M3 12c3-5 9-6.5 13-3l4-3v12l-4-3c-4 3.5-10 2-13-3Z\"/><circle cx=\"8\" cy=\"11\" r=\".9\" fill=\"currentColor\" stroke=\"none\"/>",
+"salad": "<path d=\"M3 13h18a9 8 0 0 1-18 0Z\"/><path d=\"M8 13c-1-3 1-6 4-7 0 3-1 5-4 7ZM12 13c0-3 2.5-5.5 6-5.5-.5 3-2.5 5-6 5.5Z\"/>",
+"beer": "<path d=\"M6 8h9v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8Z\"/><path d=\"M15 10h2a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2\"/><path d=\"M6 8a2.5 2.5 0 0 1 2.4-3.2A3 3 0 0 1 13.6 5 2.2 2.2 0 0 1 15 8\"/><path d=\"M9.5 12v5M12 12v5\"/>",
+"set": "<circle cx=\"12\" cy=\"13\" r=\"6\"/><circle cx=\"12\" cy=\"13\" r=\"3\"/><path d=\"M3 4v6a2 2 0 0 0 2 2v8M3 4v4M5 4v4M7 4v6a2 2 0 0 1-2 2\"/><path d=\"M21 4c-1.5 0-2.5 2-2.5 4.5S19.5 12 21 12v8\"/>",
+"other": "<path d=\"M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9Z\"/><circle cx=\"8\" cy=\"8\" r=\"1.5\"/>"
 };
 function ic(name,cls){const p=LINE_ICONS[name]||LINE_ICONS.info;return `<svg class="lic${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`}
+
+// ---------------------------------------------------------------------
+// Menu-category icons: solid colour chip + white line glyph (skill-logo-mobile-app, "category chip").
+// Each category stores an icon name; old or unnamed categories get one guessed from their name,
+// and anything we cannot guess gets the tag glyph with a stable colour from the name.
+// ---------------------------------------------------------------------
+const CAT_ICONS={
+  noodle: {label:'ก๋วยเตี๋ยว / เส้น', color:'#ea580c'},
+  rice:   {label:'ข้าว / อาหารจานเดียว', color:'#b45309'},
+  meat:   {label:'ปิ้งย่าง / ทอด', color:'#dc2626'},
+  fish:   {label:'อาหารทะเล', color:'#0284c7'},
+  salad:  {label:'ยำ / สลัด / ส้มตำ', color:'#16a34a'},
+  fries:  {label:'ของทานเล่น', color:'#c2410c'},
+  set:    {label:'ชุดอาหาร', color:'#4f46e5'},
+  drink:  {label:'เครื่องดื่ม', color:'#0d9488'},
+  coffee: {label:'กาแฟ / ชา', color:'#92400e'},
+  beer:   {label:'เบียร์ / แอลกอฮอล์', color:'#a16207'},
+  dessert:{label:'ของหวาน / ไอศกรีม', color:'#db2777'},
+  cake:   {label:'เบเกอรี่ / ขนม', color:'#9333ea'},
+  other:  {label:'อื่นๆ', color:'#64748b'},
+};
+const CAT_GUESS=[
+  [/ก๋วยเตี๋ยว|เส้น|บะหมี่|ราเม|อุด้ง|noodle|ramen|pho/i,'noodle'],
+  [/กาแฟ|coffee|ชา(?!บู)|tea|โกโก้|cocoa/i,'coffee'],
+  [/เบียร์|beer|เหล้า|ไวน์|wine|cocktail|ค็อกเทล/i,'beer'],
+  [/เครื่องดื่ม|น้ำ|drink|โซดา|soda|juice|น้ำผลไม้|ปั่น|smoothie/i,'drink'],
+  [/ของหวาน|ไอติม|ไอศกรีม|dessert|ice ?cream|บิงซู|ลอดช่อง|บัวลอย/i,'dessert'],
+  [/เค้ก|cake|เบเกอรี่|bakery|ขนม|ครัวซอง|bread|ขนมปัง/i,'cake'],
+  [/ทานเล่น|snack|เฟรนช์ฟราย|fries|ของว่าง|appetizer/i,'fries'],
+  [/ทะเล|seafood|ปลา|fish|กุ้ง|shrimp|หมึก|ปู/i,'fish'],
+  [/ยำ|สลัด|salad|ส้มตำ|ตำ/i,'salad'],
+  [/ชุด|เซ็ต|set|combo|คอมโบ/i,'set'],
+  [/ข้าว|rice|กับข้าว|อาหารจานเดียว|ราดหน้า/i,'rice'],
+  [/ปิ้ง|ย่าง|ทอด|ไก่|หมู|เนื้อ|grill|bbq|chicken|pork|beef|steak|สเต๊ก/i,'meat'],
+];
+// emoji the old POSPRO (and many users) put in names / labels -> line icon
+const EMOJI_ICON={'🍜':'noodle','🍝':'noodle','🍚':'rice','🍛':'rice','🍙':'rice','🍗':'meat','🍖':'meat','🥩':'meat','🍢':'meat','🐟':'fish','🐠':'fish','🦐':'fish','🍤':'fish','🦀':'fish','🦑':'fish',
+  '🥗':'salad','🥬':'salad','🍟':'fries','🥟':'fries','🍱':'set','🍽':'set','🥤':'drink','🧃':'drink','🧋':'drink','🍹':'drink','🥛':'drink','☕':'coffee','🍵':'coffee','🍺':'beer','🍻':'beer','🍷':'beer','🍸':'beer',
+  '🍨':'dessert','🍦':'dessert','🍧':'dessert','🍰':'cake','🎂':'cake','🧁':'cake','🍩':'cake','🍞':'cake','🥐':'cake',
+  '🧾':'pos','📋':'book','📦':'box','🏷':'tag','💳':'card','📊':'summary','📈':'summary','🧮':'expense','🔒':'lock','⚙':'settings','🔥':'flame','🖨':'printer','🚪':'logout','💵':'cash','💰':'cash','🔗':'link','✅':'check','✔':'check','❌':'x','✖':'x','🔔':'bell','👥':'users','👤':'profile','📷':'camera','🕒':'clock','⏰':'clock','🗑':'trash','✏':'edit','🔍':'search','📱':'phone','🏪':'store','🪑':'table','📝':'note','ℹ':'info'};
+const EMOJI_RE=new RegExp('('+Object.keys(EMOJI_ICON).map(e=>e.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')\\uFE0F?','gu');
+
+function stripEmoji(s){return String(s||'').replace(EMOJI_RE,'').replace(/\s{2,}/g,' ').trim()}
+function hashHue(s){let h=0;for(const ch of String(s||''))h=(h*31+ch.codePointAt(0))>>>0;return h%360}
+function guessCatIcon(name){
+  const s=String(name||'');
+  const em=s.match(EMOJI_RE);
+  if(em){const k=EMOJI_ICON[em[0].replace('️','')];if(CAT_ICONS[k])return k}
+  for(const [re,k] of CAT_GUESS)if(re.test(s))return k;
+  return 'other';
+}
+function catIconOf(cat){return cat&&cat.icon&&CAT_ICONS[cat.icon]?cat.icon:guessCatIcon(cat&&cat.name)}
+function catColorOf(cat){const k=catIconOf(cat);return k==='other'?`hsl(${hashHue(cat&&cat.name)} 55% 42%)`:CAT_ICONS[k].color}
+function catChip(cat,size){size=size||36;return `<span class="catchip" style="width:${size}px;height:${size}px;background:${catColorOf(cat)}">${ic(catIconOf(cat))}</span>`}
+
+// replaces known emoji in visible text with line icons, everywhere in the app, as the DOM changes.
+// Inputs, textareas and anything inside .keep-emoji are left alone, so what people type is never altered.
+function emojiToIcons(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){
+    const p=n.parentElement;if(!p||!n.nodeValue)return NodeFilter.FILTER_REJECT;
+    if(p.closest('script,style,textarea,input,select,option,svg,[contenteditable],.keep-emoji'))return NodeFilter.FILTER_REJECT;
+    EMOJI_RE.lastIndex=0;return EMOJI_RE.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});
+  const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  for(const n of nodes){
+    const span=document.createElement('span');
+    span.innerHTML=esc(n.nodeValue).replace(EMOJI_RE,(m)=>ic(EMOJI_ICON[m.replace('️','')],'emo'));
+    n.replaceWith(...span.childNodes);
+  }
+}
+let _emojiQueued=false;
+function startEmojiConverter(){
+  if(typeof MutationObserver==='undefined')return;
+  const run=()=>{_emojiQueued=false;emojiToIcons(document.body)};
+  new MutationObserver(()=>{if(!_emojiQueued){_emojiQueued=true;requestAnimationFrame(run)}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+  run();
+}

@@ -119,8 +119,10 @@ async function afterLogin(){
 function enterShop(m){
   S.shopId=m.shop_id;S.shop=m.shops;S.role=m.role;S.me=m;
   LS.set('pospro_shop',m.shop_id);
+  S.cart=null;
   renderShell();
   go(defaultPage(),{reset:true});
+  startLive();
 }
 
 function defaultName(){return LS.get('pospro_display_name')||(S.user&&S.user.user_metadata&&S.user.user_metadata.full_name)||''}
@@ -170,6 +172,7 @@ function renderPending(){
 }
 
 async function signOut(){
+  stopLive();
   try{await sb.auth.signOut()}catch(e){}
   Object.assign(S,{user:null,memberships:[],shopId:null,shop:null,role:null,me:null,stack:[]});
   renderLogin();

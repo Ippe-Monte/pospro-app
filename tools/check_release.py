@@ -50,7 +50,12 @@ def main():
 
     # 3) script coverage
     jsdir = os.path.join(R, 'js'); files = sorted(f[:-3] for f in os.listdir(jsdir) if f.endswith('.js')) if os.path.isdir(jsdir) else []
-    loaded = set(re.findall(r'src="js/([A-Za-z0-9_]+)\.js', html))
+    other_pages = ''.join(open(os.path.join(R, f), encoding='utf-8').read() for f in sorted(os.listdir(R)) if f.endswith('.html') and f != a.index)
+    loaded = set(re.findall(r'src="js/([A-Za-z0-9_]+)\.js', html + other_pages))   # POSPRO: order.html (customer page) loads its own scripts
+    for f in sorted(os.listdir(R)):
+        if f.endswith('.html') and f != a.index:
+            ov = sorted(set(re.findall(r'\?v=(\d+)', open(os.path.join(R, f), encoding='utf-8').read())))
+            (ok if ov in ([], [N]) else fail)(f'{f}: asset versions {ov or "none"} match index.html ({N})')
     listed = set(re.findall(r"'([A-Za-z0-9_]+)'", sw))
     miss_load = [f for f in files if f not in loaded]; miss_sw = [f for f in files if f not in listed]
     (fail if miss_load else ok)(f'every js file is loaded by index.html' + (f' - missing: {miss_load}' if miss_load else f' ({len(files)} files)'))

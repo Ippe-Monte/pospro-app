@@ -50,8 +50,9 @@ definePage('menu',{title:'เมนูและสินค้า',roles:['owner
 
 function productTile(p,cats){
   const url=imgUrl(p.image_path);
+  const cat=cats.find(c=>c.id===p.category_id)||{name:p.name};const tint=catColorOf(cat);
   return `<button type="button" class="ptile${p.is_available?'':' off'}" data-prod="${p.id}">
-    <span class="ph"${url?` style="background-image:url('${esc(url)}')"`:''}>${url?'':ic('bowl')}${p.is_available?'':'<span class="pill bad">หมด</span>'}</span>
+    <span class="ph"${url?` style="background-image:url('${esc(url)}')"`:` style="background:color-mix(in srgb, ${tint} 14%, #fff);color:${tint}"`}>${url?'':ic(catIconOf(cat))}${p.is_available?'':'<span class="pill bad">หมด</span>'}</span>
     <span class="bd"><span class="nm" style="display:block">${esc(p.name)}</span><span class="pr">${baht(p.price)}</span></span></button>`;
 }
 
@@ -74,7 +75,7 @@ function renderCatsTab(d){
   return d.cats.map(c=>{
     const gs=d.groups.filter(g=>g.category_id===c.id);
     const n=d.prods.filter(p=>p.category_id===c.id).length;
-    return `<div class="list"><button type="button" class="row tap" style="width:100%;text-align:left" data-editcat="${c.id}"><span class="ichip">${ic('book')}</span><span class="grow"><span class="t">${esc(c.name)}</span><span class="s">${n} เมนู · ตัวเลือก ${gs.length} กลุ่ม</span></span>${ic('edit')}</button>
+    return `<div class="list"><button type="button" class="row tap" style="width:100%;text-align:left" data-editcat="${c.id}">${catChip(c,40)}<span class="grow"><span class="t">${esc(stripEmoji(c.name)||c.name)}</span><span class="s">${n} เมนู · ตัวเลือก ${gs.length} กลุ่ม</span></span>${ic('edit')}</button>
       ${gs.map(g=>`<button type="button" class="row tap" style="width:100%;text-align:left;padding-left:64px" data-group="${g.id}"><span class="grow"><span class="t">${esc(g.name)} ${g.required?'<span class="pill warn">ต้องเลือก</span>':''} ${g.multi?'<span class="pill">เลือกได้หลายอย่าง</span>':''}</span><span class="s">${esc((g.choices||[]).map(choiceLine).join(' · ')||'ยังไม่มีตัวเลือก')}</span></span>${ic('chevr')}</button>`).join('')}
       <button type="button" class="row tap" style="width:100%;text-align:left;padding-left:64px;color:var(--brand-d);font-weight:700" data-addgroup="${c.id}">${ic('plus')}เพิ่มกลุ่มตัวเลือก (เช่น เส้น ขนาด เพิ่มเติม)</button></div>`;
   }).join('');
@@ -94,9 +95,11 @@ function editProduct(p){
       <div class="field"><label for="peCost">ต้นทุน (บาท)</label><input id="peCost" inputmode="decimal" value="${esc(p.cost||0)}"></div></div>
     <div class="grid2"><div class="field"><label for="peCat">หมวดหมู่</label><select id="peCat">${opt(d.cats,p.category_id,'— ไม่มีหมวด —')}</select></div>
       <div class="field"><label for="peSt">ส่งไปที่ครัว</label><select id="peSt">${opt(d.stations,p.station_id,'— ไม่ส่งครัว —')}</select></div></div>
-    <label class="switch"><span>เปิดขาย (ปิด = แสดงว่าหมด)</span><input type="checkbox" id="peAvail"${p.is_available?' checked':''}></label>`,
+    <label class="switch"><span>เปิดขาย (ปิด = แสดงว่าหมด)</span><input type="checkbox" id="peAvail"${p.is_available?' checked':''}></label>
+    <details class="fold"><summary>${ic('box')}สูตร / ตัดสต๊อกอัตโนมัติ</summary><p class="mini muted">ใส่วัตถุดิบที่ใช้ต่อ 1 จาน ระบบจะตัดสต๊อกให้ทุกครั้งที่ชำระเงิน</p><div id="peRecipe"><div class="mini muted">กำลังโหลด...</div></div></details>`,
     `${isNew?'':`<button type="button" class="btn danger" id="peDel" style="flex:0 0 auto" aria-label="ลบเมนู">${ic('trash')}</button>`}<button type="button" class="btn" id="peSave">บันทึก</button>`);
   const el=s.el,box=el.querySelector('#pePhoto'),info=el.querySelector('#peInfo'),delBtn=el.querySelector('#peDelPhoto');
+  let recipe=null;recipeEditor(el.querySelector('#peRecipe'),p.id).then(r=>{recipe=r}).catch(e=>{el.querySelector('#peRecipe').textContent=friendlyError(e)});
 
   function paintPhoto(){
     const url=photo.preview||(!photo.remove&&imgUrl(p.image_path));
@@ -132,6 +135,8 @@ function editProduct(p){
     let id=p.id;
     if(isNew){id=must(await sb.from('products').insert(row).select('id').single()).id}
     else must(await sb.from('products').update(row).eq('id',id));
+    if(recipe)try{await recipe.save(id)}catch(err){toast('บันทึกเมนูแล้ว แต่บันทึกสูตรไม่สำเร็จ: '+friendlyError(err),true)}
+    invalidateCatalog();
     const oldPath=p.image_path;
     if(photo.blob){
       el.querySelector('#peSave').textContent='กำลังอัปโหลดรูป...';
@@ -162,13 +167,22 @@ function editCategory(c){
   const isNew=!c;c=c||{name:'',sort:(MENU_UI.data.cats.length+1)};
   const s=openSheet(isNew?'เพิ่มหมวดหมู่':'แก้ไขหมวดหมู่',`
     <div class="field"><label for="ceName">ชื่อหมวด</label><input id="ceName" maxlength="60" value="${esc(c.name)}" placeholder="เช่น ก๋วยเตี๋ยว"></div>
+    <div class="field"><label>ไอคอน</label><div class="iconpick" id="ceIcons">${Object.entries(CAT_ICONS).map(([k,m])=>`<button type="button" data-icon="${k}" title="${esc(m.label)}" aria-label="${esc(m.label)}">${catChip({icon:k,name:c.name},40)}<span>${esc(m.label.split(' /')[0])}</span></button>`).join('')}</div>
+      <div class="hint" id="ceIconHint"></div></div>
     <div class="field"><label for="ceSort">ลำดับการแสดง</label><input id="ceSort" inputmode="numeric" value="${esc(c.sort||0)}"><div class="hint">เลขน้อยแสดงก่อน</div></div>`,
     `${isNew?'':`<button type="button" class="btn danger" id="ceDel" style="flex:0 0 auto" aria-label="ลบหมวด">${ic('trash')}</button>`}<button type="button" class="btn" id="ceSave">บันทึก</button>`);
+  let icon=c.icon||null;
+  const paintIcons=()=>{const auto=guessCatIcon(val(s.el,'#ceName'));const cur=icon||auto;
+    s.el.querySelectorAll('[data-icon]').forEach(b=>b.classList.toggle('on',b.dataset.icon===cur));
+    s.el.querySelector('#ceIconHint').textContent=icon?'เลือกเองแล้ว (แตะอีกครั้งเพื่อให้ระบบเลือกตามชื่อ)':'ระบบเลือกให้ตามชื่อหมวด แตะเพื่อเปลี่ยน'};
+  s.el.querySelectorAll('[data-icon]').forEach(b=>b.onclick=()=>{icon=icon===b.dataset.icon?null:b.dataset.icon;paintIcons()});
+  s.el.querySelector('#ceName').addEventListener('input',paintIcons);paintIcons();
   s.el.querySelector('#ceSave').onclick=e=>withBusy(e.currentTarget,'กำลังบันทึก...',async()=>{
     const name=val(s.el,'#ceName'),sort=parseInt(val(s.el,'#ceSort'))||0;
     if(!name)return toast('กรุณาใส่ชื่อหมวด',true);
-    if(isNew)must(await sb.from('categories').insert({shop_id:S.shopId,name,sort}));
-    else must(await sb.from('categories').update({name,sort}).eq('id',c.id));
+    if(isNew)must(await sb.from('categories').insert({shop_id:S.shopId,name,sort,icon}));
+    else must(await sb.from('categories').update({name,sort,icon}).eq('id',c.id));
+    invalidateCatalog();
     s.close();toast('บันทึกแล้ว');refresh();
   });
   const del=s.el.querySelector('#ceDel');
@@ -199,7 +213,7 @@ function editGroup(g,catId){
     const row={name,choices,required:s.el.querySelector('#geReq').checked,multi:s.el.querySelector('#geMulti').checked};
     if(isNew)must(await sb.from('option_groups').insert({...row,shop_id:S.shopId,category_id:g.category_id}));
     else must(await sb.from('option_groups').update(row).eq('id',g.id));
-    s.close();toast('บันทึกแล้ว');refresh();
+    invalidateCatalog();s.close();toast('บันทึกแล้ว');refresh();
   });
   const del=s.el.querySelector('#geDel');
   if(del)del.onclick=async()=>{
